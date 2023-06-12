@@ -364,7 +364,7 @@ public final class SQLBuffer
                     _cols.add(col);
             } else {
                 if (type == String.class) {
-                    _sql.append("'" + o.toString().replace("'", "''") + "'");
+                    appendQuotedString(o.toString());
 
                 } else if ( type == Character.class ) {
                     final char c = (Character)o;
@@ -385,6 +385,32 @@ public final class SQLBuffer
             }
         }
         return this;
+    }
+
+    private void appendQuotedString(String s) {
+        final StringBuilder sb = _sql;
+        sb.append('\'');
+        int quotePos = s.indexOf('\'');
+        if (quotePos == -1) {
+            sb.append(s);
+        }
+        else {
+            int from = 0;
+            for (;;) {
+                sb.append(s, from, quotePos);
+                sb.append("''");
+                from = quotePos + 1;
+                if (from >= s.length()) {
+                    break;
+                }
+                quotePos = s.indexOf('\'', from);
+                if (quotePos == -1) {
+                    sb.append(s, from, s.length());
+                    break;
+                }
+            }
+        }
+        sb.append('\'');
     }
 
     private boolean validParamLiteralType(Class<?> type) {
