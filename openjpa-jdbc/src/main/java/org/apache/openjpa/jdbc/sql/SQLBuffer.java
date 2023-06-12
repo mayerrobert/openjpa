@@ -60,10 +60,10 @@ public final class SQLBuffer
     
     private static final long serialVersionUID = 1L;
 
-    private static final String PARAMETER_TOKEN = "?";
+    private static final char PARAMETER_TOKEN = '?';
 
     private final DBDictionary _dict;
-    private final StringBuilder _sql = new StringBuilder();
+    private final StringBuilder _sql;
     private List _subsels = null;
     private List _params = null;
     private List _cols = null;
@@ -78,6 +78,7 @@ public final class SQLBuffer
      */
     public SQLBuffer(DBDictionary dict) {
         _dict = dict;
+        _sql = new StringBuilder();
     }
 
     /**
@@ -85,6 +86,7 @@ public final class SQLBuffer
      */
     public SQLBuffer(SQLBuffer buf) {
         _dict = buf._dict;
+        _sql = new StringBuilder(Math.max(16, buf._sql.length()));
         append(buf);
     }
 
@@ -142,9 +144,9 @@ public final class SQLBuffer
 
         if (!paramOnly) {
             if (sqlIndex == _sql.length())
-                _sql.append(buf._sql.toString());
+                _sql.append(buf._sql);
             else
-                _sql.insert(sqlIndex, buf._sql.toString());
+                _sql.insert(sqlIndex, buf._sql);
         }
 
         if (buf._params != null) {
@@ -264,14 +266,14 @@ public final class SQLBuffer
      */
     private SQLBuffer append(Select sel, JDBCFetchConfiguration fetch,
         boolean count) {
-        _sql.append("(");
+        _sql.append('(');
         Subselect sub = new Subselect();
         sub.select = sel;
         sub.fetch = fetch;
         sub.count = count;
         sub.sqlIndex = _sql.length();
         sub.paramIndex = (_params == null) ? 0 : _params.size();
-        _sql.append(")");
+        _sql.append(')');
 
         if (_subsels == null)
             _subsels = new ArrayList(2);
@@ -365,10 +367,13 @@ public final class SQLBuffer
                     _sql.append("'" + o.toString().replace("'", "''") + "'");
 
                 } else if ( type == Character.class ) {
+                    final char c = (Character)o;
                     if (_dict.storeCharsAsNumbers) {
-                        _sql.append(Integer.toString((Character) o));
+                        _sql.append(Integer.toString(c));
+                    } else if (c != '\'') {
+                        _sql.append('\'').append(c).append('\'');
                     } else {
-                        _sql.append("'" + o.toString().replace("'", "''") + "'");
+                        _sql.append("''''");
                     }
                 } else if (type == Boolean.class) {
                     Boolean b = (Boolean) o;
@@ -429,11 +434,11 @@ public final class SQLBuffer
      */
     public String getSQL(boolean replaceParams) {
         resolveSubselects();
-        String sql = _sql.toString();
+        StringBuilder sql = _sql;
         if (!replaceParams || _params == null || _params.isEmpty())
-            return sql;
+            return sql.toString();
 
-        StringBuilder buf = new StringBuilder();
+        StringBuilder buf = new StringBuilder(sql.length() + 16);
         Iterator pi = _params.iterator();
         for (int i = 0; i < sql.length(); i++) {
             if (sql.charAt(i) != '?') {
@@ -446,10 +451,12 @@ public final class SQLBuffer
                 buf.append("NULL");
             else if (param instanceof Number || param instanceof Boolean)
                 buf.append(param);
-            else if (param instanceof String || param instanceof Character)
-                buf.append("'").append(param).append("'");
+            else if (param instanceof String)
+                buf.append('\'').append((String)param).append('\'');
+            else if (param instanceof Character)
+                buf.append('\'').append((char)param).append('\'');
             else
-                buf.append("?");
+                buf.append('?');
         }
         return buf.toString();
     }
@@ -624,7 +631,7 @@ public final class SQLBuffer
      * parameters.
      */
     public boolean sqlEquals(String sql) {
-        return _sql.toString().equals(sql);
+        return sql != null && sql.contentEquals(_sql);
     }
 
     @Override
@@ -635,7 +642,7 @@ public final class SQLBuffer
             return false;
 
         SQLBuffer buf = (SQLBuffer) other;
-        return _sql.equals(buf._sql)
+        return _sql.equals(buf._sql) // using StringBuilder.equals() is likely wrong because StringBuilder does not override Object.equals()
             && Objects.equals(_params, buf._params);
     }
 

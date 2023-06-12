@@ -861,13 +861,11 @@ public class RowImpl
 
             if (hasVal)
                 buf.append(", ");
-            buf.append(dict.getColumnDBName(_cols[i]));
+            buf.append(dict.getColumnDBName(_cols[i])).append(" = ");
             if (_types[i] == RAW)
-                buf.append(" = ").append(_vals[i]);
-            else {
-                buf.append(" = ");
+                buf.append(_vals[i]);
+            else
                 buf.append(dict.getMarkerForInsertUpdate(_cols[i], _vals[i]));
-            }
             hasVal = true;
         }
 
@@ -879,7 +877,8 @@ public class RowImpl
      * Return the SQL for a prepared statement insert on this row.
      */
     private String getInsertSQL(DBDictionary dict) {
-        StringBuilder buf = new StringBuilder();
+        StringBuilder buf = new StringBuilder(32); // the string literals in this method will add up to at least 25 chars
+                                                   // so StringBuilder's default capacity 16 is never enough
         StringBuilder vals = new StringBuilder();
         buf.append("INSERT INTO ").
             append(dict.getFullName(getTable(), false)).append(" (");
@@ -901,7 +900,7 @@ public class RowImpl
             hasVal = true;
         }
 
-        buf.append(") VALUES (").append(vals.toString()).append(")");
+        buf.append(") VALUES (").append(vals).append(')');
         return buf.toString();
     }
 
