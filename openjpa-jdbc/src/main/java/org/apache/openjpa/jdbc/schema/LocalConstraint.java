@@ -105,9 +105,7 @@ public abstract class LocalConstraint extends Constraint {
      */
     public void addColumn(Column col) {
     	if (col == null)
-            throw new InvalidStateException(_loc.get("table-mismatch",
-                col == null ? null : col.getTable(),
-                col == null ? null : getTable()));
+            throw new InvalidStateException(_loc.get("table-mismatch", null, null));
 
         if (_colList == null)
             _colList = new ArrayList<>(3);

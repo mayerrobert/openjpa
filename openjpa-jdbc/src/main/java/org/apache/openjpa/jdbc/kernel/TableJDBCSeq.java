@@ -910,7 +910,6 @@ public class TableJDBCSeq extends AbstractJDBCSeq implements Configurable {
         @Override
         public void run() throws RuntimeException {
             Connection conn = null;
-            SQLException err = null;
             try {
                 // Try to use the store's connection.
 
@@ -941,8 +940,7 @@ public class TableJDBCSeq extends AbstractJDBCSeq implements Configurable {
                     conn = getConnection(store);
                     if (!setSequence(mapping, stat, alloc, updateStatSeq, conn))
                     {
-                        throw (err != null) ? err : new SQLException(_loc.get(
-                                "no-seq-row", mapping, _table).getMessage());
+                        throw new SQLException(_loc.get("no-seq-row", mapping, _table).getMessage());
                     }
                     closeConnection(conn);
                 }

@@ -859,11 +859,9 @@ public class MappingRepository extends MetaDataRepository {
         if (explicitStrat != null) {
             if (explicitStrat instanceof FieldStrategy)
                 return (FieldStrategy) explicitStrat;
-            if (explicitStrat != null) {
-                if (installHandlers)
-                    field.setHandler((ValueHandler) explicitStrat);
-                return new HandlerFieldStrategy();
-            }
+            if (installHandlers)
+                field.setHandler((ValueHandler) explicitStrat);
+            return new HandlerFieldStrategy();
         }
 
         if (field.isSerialized()) {

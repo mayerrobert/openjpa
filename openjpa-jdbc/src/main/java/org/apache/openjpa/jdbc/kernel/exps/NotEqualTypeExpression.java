@@ -128,8 +128,7 @@ class NotEqualTypeExpression
     void processVerticalTypeAppend(Select sel, Val val1, Val val2, ExpContext ctx,
             SQLBuffer buf) {
         ClassMapping sub = getSubClassMapping(val1, val2, ctx);
-        ClassMapping cm1 = (ClassMapping)((val1 instanceof Type) ? val1.getMetaData() :
-            val1.getMetaData());
+        ClassMapping cm1 = (ClassMapping)(val1.getMetaData());
         if (sub != null && sub.isVerticalStrategy()) {
             ClassMetaData[] subs = cm1.getPCSubclassMetaDatas();
             List exSelectFrom = sel.getExcludedJoinedTableClassMeta();

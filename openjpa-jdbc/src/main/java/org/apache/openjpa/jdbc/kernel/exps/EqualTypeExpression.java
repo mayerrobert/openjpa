@@ -129,8 +129,7 @@ class EqualTypeExpression
             selectFrom = new ArrayList();
             sel.setJoinedTableClassMeta(selectFrom);
         }
-        ClassMapping cm1 = (ClassMapping)((val1 instanceof Type) ? val1.getMetaData() :
-            val1.getMetaData());
+        ClassMapping cm1 = (ClassMapping)(val1.getMetaData());
         if (sub.isVerticalStrategy()) {
             ClassMetaData[] subs = cm1.getPCSubclassMetaDatas();
             for (ClassMetaData classMetaData : subs) {

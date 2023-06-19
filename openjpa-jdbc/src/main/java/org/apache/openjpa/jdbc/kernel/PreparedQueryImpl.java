@@ -178,7 +178,7 @@ public class PreparedQueryImpl implements PreparedQuery {
         SelectExecutor selector = (SelectExecutor)extract[0];
         if (selector == null)
             return new PreparedQueryCacheImpl.StrongExclusion(_id, ((Localizer.Message)extract[1]).getMessage());
-        if (selector == null || selector.hasMultipleSelects()
+        if (selector.hasMultipleSelects()
             || ((selector instanceof Union)
             && (((Union)selector).getSelects().length != 1)))
             return new PreparedQueryCacheImpl.StrongExclusion(_id, _loc.get("exclude-multi-select", _id).getMessage());
@@ -276,12 +276,8 @@ public class PreparedQueryImpl implements PreparedQuery {
     }
 
     private boolean isPaginated() {
-        if (select instanceof SelectImpl) {
-            if (((SelectImpl)select).getStartIndex() != 0 ||
-                ((SelectImpl)select).getEndIndex() != Long.MAX_VALUE)
-                return true;
-        }
-        return false;
+        return select != null
+               && (select.getStartIndex() != 0 || select.getEndIndex() != Long.MAX_VALUE);
     }
     private boolean isUsingFieldStrategy() {
         for (QueryExpressions exp : _exps) {

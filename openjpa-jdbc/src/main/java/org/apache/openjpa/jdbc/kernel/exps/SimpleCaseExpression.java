@@ -87,13 +87,9 @@ public class SimpleCaseExpression
     @Override
     public ExpState initialize(Select sel, ExpContext ctx, int flags) {
         ExpState[] states = new ExpState[_exp.length+2];
-        Joins joins = null;
 
         states[0] = _caseOperand.initialize(sel, ctx, 0);
-        if (joins == null)
-            joins = states[0].joins;
-        else
-            joins = sel.and(joins, states[0].joins);
+        Joins joins = states[0].joins;
         for (int i = 0; i < _exp.length; i++) {
             states[i+1] = _exp[i].initialize(sel, ctx, null);
             if (joins == null)
